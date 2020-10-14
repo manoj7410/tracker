@@ -26,6 +26,7 @@ USB/PCIe/M.2 Accelerator.
     ```
 3.  Install dependency for Sort Tracker
     ```
+    sudo apt install python3-skimage
     pip3 install -r requirements_for_sort_tracker.txt
     ```
     See https://github.com/abewley/sort for algorithm details and link to original paper.

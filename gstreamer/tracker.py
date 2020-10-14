@@ -25,7 +25,6 @@ trackerObjectName.
 
 """
 
-
 class ObjectTracker(object):
     def __init__(self, trackerObjectName):
         if trackerObjectName == 'sort': #Add more trackers in elif whenever needed
@@ -35,6 +34,6 @@ class ObjectTracker(object):
             self.trackerObject = None
 class SortTracker(ObjectTracker):
     def __init__(self):
-        from sort import *
+        from sort import Sort
         self.mot_tracker = Sort()
 
