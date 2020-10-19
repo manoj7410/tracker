@@ -1,13 +1,13 @@
 # vim: expandtab:ts=4:sw=4
 from __future__ import absolute_import
 import numpy as np
-from . import kalman_filter
-from . import linear_assignment
-from . import iou_matching
-from .track import Track
+import kalman_filter
+import linear_assignment
+import iou_matching
+from track import Track
+import detection
 
-
-class Tracker:
+class DeepSortTracker:
     """
     This is the multi-target tracker.
 
@@ -64,6 +64,8 @@ class Tracker:
             A list of detections at the current time step.
 
         """
+        detections = self.create_detections(detections)
+        print (detections)
         # Run matching cascade.
         matches, unmatched_tracks, unmatched_detections = \
             self._match(detections)
@@ -89,6 +91,44 @@ class Tracker:
             track.features = []
         self.metric.partial_fit(
             np.asarray(features), np.asarray(targets), active_targets)
+        
+        # Store results.
+        results = []
+        for track in self.tracks:
+            if not track.is_confirmed() or track.time_since_update > 1:
+                continue
+            bbox = track.to_tlwh()
+            results.append([
+                bbox[0], bbox[1], bbox[2], bbox[3], np.array(track.track_id)])
+        print ("RESULTS @@@@")
+        print (results)
+        return results
+
+
+    def create_detections(self, detections, min_height=0):
+        """Create detections for given frame index from the raw detection matrix.
+
+        Parameters
+        ----------
+        detections : ndarray
+            Detections in ndarray form.
+        frame_idx : int
+            The frame index.
+        min_height : Optional[int]
+            A minimum detection bounding box height. Detections that are smaller
+            than this value are disregarded.
+
+        Returns
+        -------
+        List[tracker.Detection]
+            Returns detection responses at given frame index.
+
+        """
+        detection_list = []
+        for value in detections:
+            bbox, confidence, feature = value[0:4], value[4], 1 # Fix feature value
+            detection_list.append(detection.Detection(bbox, confidence, feature))
+        return detection_list
 
     def _match(self, detections):
 
@@ -132,7 +172,7 @@ class Tracker:
 
     def _initiate_track(self, detection):
         mean, covariance = self.kf.initiate(detection.to_xyah())
+        #mean, covariance = self.kf.initiate(detection)
         self.tracks.append(Track(
-            mean, covariance, self._next_id, self.n_init, self.max_age,
-            detection.feature))
+            mean, covariance, self._next_id, self.n_init, self.max_age))
         self._next_id += 1

@@ -29,6 +29,8 @@ class ObjectTracker(object):
     def __init__(self, trackerObjectName):
         if trackerObjectName == 'sort': #Add more trackers in elif whenever needed
             self.trackerObject = SortTracker()
+        elif trackerObjectName == 'deepsort':
+            self.trackerObject = DeepSortTrackerObject()
         else:
             print("Invalid Tracker Name")
             self.trackerObject = None
@@ -36,4 +38,14 @@ class SortTracker(ObjectTracker):
     def __init__(self):
         from sort import Sort
         self.mot_tracker = Sort()
+
+class DeepSortTrackerObject(ObjectTracker):
+    def __init__(self):
+        from deep_sort_algo import DeepSortTracker
+        import nn_matching
+        max_cosine_distance = 0.2 # Gating threshold for cosine distance. Keeping default value for now
+        nn_budget = None # Maximum size of the appearance descriptors
+        metric = nn_matching.NearestNeighborDistanceMetric(
+            "cosine", max_cosine_distance, nn_budget)
+        self.mot_tracker = DeepSortTracker(metric)
 

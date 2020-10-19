@@ -68,8 +68,10 @@ def generate_svg(src_size, inference_size, inference_box, objs, labels, text_lin
 
     for y, line in enumerate(text_lines, start=1):
         shadow_text(dwg, 10, y*20, line)
-    if trackerFlag and trdata.any():
+    if trackerFlag and (np.array(trdata)).size:
         for td in trdata:
+            #print(trdata)
+            #print (td)
             x0, y0, x1, y1, trackID = td[0].item(), td[1].item(
             ), td[2].item(), td[3].item(), td[4].item()
             overlap = 0
@@ -162,7 +164,7 @@ def main():
                         choices=['raw', 'h264', 'jpeg'])
     parser.add_argument('--tracker', help='Name of the Object Tracker To be used.',
                         default=None,
-                        choices=[None, 'sort'])
+                        choices=[None, 'sort', 'deepsort'])
     args = parser.parse_args()
 
     print('Loading {} with {} labels.'.format(args.model, args.labels))
